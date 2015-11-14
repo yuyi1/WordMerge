@@ -126,12 +126,13 @@ namespace WordMerge
     /// </summary>
     class WordMachine
     {
+        Word.Application application;
         Word.Documents documents = null;
         List<Object> objects = null;
 
         public WordMachine()
         {
-            var application = new Word.Application();
+            application = new Word.Application();
             application.Visible = false;
 
             documents = application.Documents;
@@ -143,6 +144,8 @@ namespace WordMerge
 
         ~WordMachine()
         {
+            application.Quit();
+
             foreach (var obj in objects)
             {
                 try
@@ -215,10 +218,10 @@ namespace WordMerge
         {
             try
             {
-                object start = item.Content.Start;
-                object end = item.Content.End;
-                item.Range(ref start, ref end).Copy();
+                // コピー
+                item.Range(item.Content.Start, item.Content.End).Copy();
 
+                // ペースト
                 var rng = document.Range(document.Content.End - 1, document.Content.End - 1);
                 rng.Paste();
             }
@@ -226,11 +229,6 @@ namespace WordMerge
             {
                 Console.WriteLine(e);
             }
-        }
-
-        private static int getLastPosition(ref Word.Document document)
-        {
-            return document.Content.End - 1;
         }
     }
 
