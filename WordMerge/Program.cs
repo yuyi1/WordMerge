@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Reflection;
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordMerge
@@ -48,10 +49,10 @@ namespace WordMerge
 
             // 一時的にWordドキュメントを生成
             var tempDoc = wordMachine.NewDocument();
-            tempDoc.Range(0, 0).Text = " ";
+            tempDoc.Content.Paragraphs.Add();
 
             // マージする
-            foreach(var doc in docs)
+            foreach (var doc in docs)
             {
                 tempDoc.Paste(doc);
             }
@@ -130,6 +131,9 @@ namespace WordMerge
         Word.Documents documents = null;
         List<Object> objects = null;
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public WordMachine()
         {
             application = new Word.Application();
@@ -142,9 +146,15 @@ namespace WordMerge
             objects.Add(documents);
         }
 
+        /// <summary>
+        /// デストラクタ
+        /// </summary>
         ~WordMachine()
         {
-            application.Quit();
+            if( application != null)
+            {
+                application.Quit();
+            }
 
             foreach (var obj in objects)
             {
@@ -171,10 +181,7 @@ namespace WordMerge
 
         public Word.Document OpenDocument(string filename)
         {
-            var missing = System.Reflection.Missing.Value as Object;
-            var objTrue = true as Object;
-            var doc = documents.Open(filename, ref missing, ref objTrue);
-
+            var doc = documents.Open(filename, Missing.Value, true);
             objects.Add(doc);
             return doc;
         }
