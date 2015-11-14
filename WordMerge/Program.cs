@@ -32,6 +32,7 @@ namespace WordMerge
             var tempFile = desktop + Path.DirectorySeparatorChar + "temp.docx";
             var mergeOutPath = desktop + Path.DirectorySeparatorChar + "統合ファイル.pdf";
 
+            // ソートされたワードのファイル一覧取得
             var files = Directory.GetFiles(mergeInPath);
             var wordFiles = files.Where(IsWordWithIndex);
             var withIndex = wordFiles.Select(wf => new { filename = wf, index = GetIndex(wf) });
@@ -47,7 +48,7 @@ namespace WordMerge
 
             // 一時的にWordドキュメントを生成
             var tempDoc = wordMachine.NewDocument();
-            tempDoc.Range(0, 0).Text = "t";
+            tempDoc.Range(0, 0).Text = " ";
 
             // マージする
             foreach(var doc in docs)
@@ -106,7 +107,6 @@ namespace WordMerge
         {
             var elements = fullpath.Split(Path.DirectorySeparatorChar);
             var filename = elements.Last();
-            var extension = filename.Split('.').LastOrDefault() ?? "NONE";
             var body = filename.Split('.').FirstOrDefault() ?? "NONE";
 
             var indexStr = body.ToCharArray()
@@ -126,13 +126,12 @@ namespace WordMerge
     /// </summary>
     class WordMachine
     {
-        Word.Application application = null;
         Word.Documents documents = null;
         List<Object> objects = null;
 
         public WordMachine()
         {
-            application = new Word.Application();
+            var application = new Word.Application();
             application.Visible = false;
 
             documents = application.Documents;
@@ -169,7 +168,10 @@ namespace WordMerge
 
         public Word.Document OpenDocument(string filename)
         {
-            var doc = documents.Open(filename);
+            var missing = System.Reflection.Missing.Value as Object;
+            var objTrue = true as Object;
+            var doc = documents.Open(filename, ref missing, ref objTrue);
+
             objects.Add(doc);
             return doc;
         }
